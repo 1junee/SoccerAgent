@@ -6,7 +6,6 @@ import json
 from tqdm import tqdm
 import argparse
 import sys
-sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline')
 
 
 
@@ -18,7 +17,8 @@ sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline')
 
 
 ######################## Parameters ########################
-PROJECT_PATH = "YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE"
+PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent"
+sys.path.append(f"{PROJECT_PATH}/pipeline")
 from toolbox import *
 
 toolbox_functions = {

@@ -3,7 +3,7 @@ import face_recognition
 import numpy as np
 import pickle
 
-PROJECT_PATH = "PROJECT_PATH" # Replace with actual project path
+PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent" # Replace with actual project path
 
 def build_face_library(base_path): # Base path to the SoccerWiki directory containing players' images.
     VALID_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png'}

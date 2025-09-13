@@ -7,7 +7,7 @@ from io import BytesIO
 from PIL import Image
 from collections import Counter
 
-PROJECT_PATH = "PROJECT_PATH" # Replace with actual project path
+PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent" # Replace with actual project path
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:

@@ -4,15 +4,15 @@ import json
 from .utils.GroundingDINO.demo.inference_on_a_image import inference_on_a_image
 import cv2
 
-PROJECT_PATH = "YOUR_PROJECT_PATH"  # Replace with your actual project path
+PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent"  # Replace with your actual project path
 
 
 def SEGMENT(query=None, material=[]):
-    config_file = "YOUR_CONFIG_PATH/GroundingDINO_SwinB_cfg.py"
-    model_weights = "YOUR_MODEL_WEIGHT_PATH/groundingdino_swinb_cogcoor.pth"
+    config_file = f"{PROJECT_PATH}/toolbox/utils/GroundingDINO/groundingdino/config/GroundingDINO_SwinB_cfg.py"
+    model_weights = f"{PROJECT_PATH}/toolbox/utils/GroundingDINO/groundingdino/config/groundingdino_swinb_cogcoor.pth"
     image_path = material[0]
     text = query
-    output_path = "HELPER_FILE" # replace with your helper file path to save the output image
+    output_path = f"{PROJECT_PATH}/log/segment" # replace with your helper file path to save the output image
     os.makedirs(output_path, exist_ok=True)
 
     file_extension = os.path.splitext(image_path)[1].lower()

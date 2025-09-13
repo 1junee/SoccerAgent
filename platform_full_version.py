@@ -1,5 +1,5 @@
 import sys, json, argparse
-sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline')
+sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline')
 import os
 import argparse
 from multiagent_platform import EXECUTE_TOOL_CHAIN
