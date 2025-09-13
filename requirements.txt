@@ -34,19 +34,24 @@ ffmpeg==1.4
 ffmpeg-python==0.2.0
 filelock==3.18.0
 fire==0.7.0
-# Ensure PyTorch stack is installed before flash_attn
+# Ensure PyTorch stack is installed
 torch==2.6.0
 torchaudio==2.6.0
 torchvision==0.21.0
 triton==3.2.0
-flash_attn==2.7.4.post1
+# NOTE: flash_attn is optional and often fails to build in clean environments
+# because its setup.py imports torch inside a build-isolated env where torch
+# is not present yet, and it also requires a matching CUDA toolchain.
+# To avoid install errors during a fresh `pip install -r requirements.txt`,
+# we skip it here. If you have a compatible GPU/CUDA and need it, install
+# separately AFTER torch is installed:
+#   PIP_NO_BUILD_ISOLATION=1 pip install --no-build-isolation flash_attn==2.7.4.post1
 flatbuffers==25.2.10
 fonttools==4.56.0
 frozenlist==1.6.0
 fsspec==2025.3.0
 future==1.0.0
 gast==0.6.0
-genai==2.1.0
 google-auth==2.39.0
 google-genai==1.12.1
 google-pasta==0.2.0

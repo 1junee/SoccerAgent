@@ -10,7 +10,7 @@ import ffmpeg
 import random
 
 def select_rand_frame(video_path):
-    output_dir = "YOUR_CACHE_FOLDER"
+    output_dir = "/home/work/wonjun/study/agent/SoccerAgent/log/cache"
     
     os.makedirs(output_dir, exist_ok=True)
     
