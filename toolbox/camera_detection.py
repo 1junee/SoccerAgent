@@ -1,4 +1,3 @@
-from openai import OpenAI
 import base64
 import re
 import os
@@ -6,6 +5,11 @@ import cv2
 from io import BytesIO
 from PIL import Image
 from collections import Counter
+from functools import lru_cache
+from typing import List, Dict, Tuple
+
+import torch
+from transformers import AutoProcessor, AutoModelForVision2Seq
 
 PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent" # Replace with actual project path
 
@@ -32,34 +36,70 @@ def extract_camera_position(reply):
         return "None"
 
 
-def send_request_with_background(prompt, img_64=None, background=[], api_key="YOUR_API_KEY"):
-    client = OpenAI(
-        base_url='YOUR_API_BASE_URL',  # Replace with your OpenAI API base URL
-        api_key=api_key
-    )
-    messages = background.copy()
-    messages.append({"role": "user", "content": []})
-    messages[-1]["content"].append({"type": "text", "text": prompt})
+@lru_cache(maxsize=1)
+def _load_qwen_vl(model_id: str = "Qwen/Qwen2.5-VL-7B-Instruct") -> Tuple[AutoProcessor, AutoModelForVision2Seq]:
+    processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
+    model = AutoModelForVision2Seq.from_pretrained(
+        model_id,
+        torch_dtype="auto",
+        device_map="auto",
+        trust_remote_code=True,
+    ).eval()
+    return processor, model
+
+
+def _data_uri_to_pil(data_uri: str) -> Image.Image:
+    # expects format like: data:image/png;base64,<base64>
+    if data_uri.startswith("data:"):
+        try:
+            base64_part = data_uri.split(",", 1)[1]
+        except Exception:
+            base64_part = data_uri
+    else:
+        base64_part = data_uri
+    raw = base64.b64decode(base64_part)
+    return Image.open(BytesIO(raw)).convert("RGB")
+
+
+def send_request_with_background(prompt, img_64=None, background=[], api_key=None, model_id: str = "Qwen/Qwen2.5-VL-7B-Instruct"):
+    # Build messages compatible with Qwen2.5-VL chat template
+    processor, model = _load_qwen_vl(model_id)
+
+    # Convert input background format to Qwen format and collect PIL images
+    q_messages: List[Dict] = []
+    images: List[Image.Image] = []
+
+    for msg in background:
+        role = msg.get("role", "user")
+        content = []
+        for item in msg.get("content", []):
+            if item.get("type") == "text":
+                content.append({"type": "text", "text": item.get("text", "")})
+            elif item.get("type") == "image_url":
+                url = item.get("image_url", {}).get("url", "")
+                if url.startswith("data:image"):
+                    pil = _data_uri_to_pil(url)
+                    images.append(pil)
+                    content.append({"type": "image", "image": pil})
+        if content:
+            q_messages.append({"role": role, "content": content})
+
+    # Append current user query
+    user_content = [{"type": "text", "text": prompt}]
     if img_64:
-        base64_image = img_64
-        messages[-1]["content"].append(
-            {
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/png;base64,{base64_image}",
-                }
-            }
-        )
-    # print(f"request size in bytes: {sys.getsizeof(messages)}")
+        pil = Image.open(BytesIO(base64.b64decode(img_64))).convert("RGB")
+        images.append(pil)
+        user_content.append({"type": "image", "image": pil})
+    q_messages.append({"role": "user", "content": user_content})
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=messages,
-        max_tokens=512,
-    )
+    # Apply chat template and prepare inputs
+    text = processor.apply_chat_template(q_messages, tokenize=False, add_generation_prompt=True)
+    inputs = processor(text=[text], images=images, return_tensors="pt").to(model.device)
 
-    model_reply = response.choices[0].message.content
-    return model_reply
+    with torch.inference_mode():
+        generate_ids = model.generate(**inputs, max_new_tokens=256)
+    output = processor.batch_decode(generate_ids, skip_special_tokens=True)[0]
+    return output
 
 
 def CAMERA_DETECTION(query=None, material=[]):
