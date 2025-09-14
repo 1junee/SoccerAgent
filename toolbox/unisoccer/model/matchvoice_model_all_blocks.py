@@ -4,7 +4,7 @@ from torch import nn
 import einops
 import contextlib
 import sys, os
-sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline/toolbox/unisoccer')
+sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox/unisoccer')
 from model.matchvoice_Qformer import BertConfig, BertLMHeadModel
 from model.MatchVision import VisionTimesformer
 from transformers.generation.logits_process import LogitsProcessor, LogitsProcessorList

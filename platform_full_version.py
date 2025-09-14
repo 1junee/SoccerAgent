@@ -1,12 +1,19 @@
 import sys, json, argparse
 sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline')
+# Add project root for baseline imports
+sys.path.append('/home/work/wonjun/study/agent/SoccerAgent')
 import os
 import argparse
 from multiagent_platform import EXECUTE_TOOL_CHAIN
-from openai import OpenAI
 
+# Old model (DeepSeek via OpenAI SDK) — kept for reference
+# from openai import OpenAI
+# client = OpenAI(api_key="your-deepseek-api-key", base_url="https://api.deepseek.com")
 
-client = OpenAI(api_key="your-deepseek-api-key", base_url="https://api.deepseek.com")
+# New model: QwenVL (local/HF) for generation
+from baseline.model import QwenVL
+QWEN_VL_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
+qwen_client = QwenVL(QWEN_VL_MODEL_ID)
 
 INSTRUCTION = f"""
 You are a football expert. You are provided with a question 'Q' and four options 'O1', 'O2', 'O3', and 'O4'.
@@ -16,14 +23,20 @@ Do not include any other text or explanations!!!
 """
 
 def workflow(input_text, Instruction=INSTRUCTION, follow_up_prompt=None, max_tokens_followup=1500):
-    completion = client.chat.completions.create(
-        model="deepseek-chat",
-        messages=[
-            {"role": "system", "content": Instruction},
-            {"role": "user", "content": input_text}
-        ],
-    )
-    first_round_reply = completion.choices[0].message.content
+    # Old path using DeepSeek via OpenAI SDK (commented)
+    # completion = client.chat.completions.create(
+    #     model="deepseek-chat",
+    #     messages=[
+    #         {"role": "system", "content": Instruction},
+    #         {"role": "user", "content": input_text}
+    #     ],
+    # )
+    # first_round_reply = completion.choices[0].message.content
+    # return first_round_reply
+
+    # New path using QwenVL; text-only by passing empty image list
+    prompt = f"{Instruction}\n\n{input_text}"
+    first_round_reply = qwen_client.chat_img(prompt, [])
     return first_round_reply
 
 import re
@@ -113,5 +126,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     process_json_file(args.input_file, args.output_file)
-
 
