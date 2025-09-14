@@ -103,7 +103,8 @@ def extract_category(output):
 
 
 import sys
-sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline/toolbox')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox")
 
 from vlm import VLM
 

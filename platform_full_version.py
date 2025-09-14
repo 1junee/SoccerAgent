@@ -1,5 +1,6 @@
 import sys, json, argparse
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline")
 import os
 import argparse
 from multiagent_platform import EXECUTE_TOOL_CHAIN
@@ -113,5 +114,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     process_json_file(args.input_file, args.output_file)
-
 

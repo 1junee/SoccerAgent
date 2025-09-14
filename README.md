@@ -16,7 +16,32 @@ To install the required dependencies for the project, simply run the following c
 
 ```bash
 pip install -r requirements.txt
+
+pip install huggingface-hub
+hf download Qwen/Qwen2.5-VL-7B-Instruct --local-dir ./Qwen2.5-VL
+huggingface-cli download Qwen/Qwen2.5-VL-7B-Instruct --local-dir ./Qwen2.5-VL
 ```
+
+# 1) 도구 설치 (없다면)
+pip install -U "huggingface_hub[cli]"
+
+# 2) 로그인(필요한 경우만, 공개라면 생략 가능)
+huggingface-cli login
+
+# 3) 전체 파일 내려받기 (심볼릭 링크 대신 실제 파일로 저장)
+huggingface-cli download \
+  --repo-type dataset Homie0609/SoccerBench \
+  --local-dir ./datasets/SoccerBench \
+  --local-dir-use-symlinks False \
+  --max-workers 2
+
+huggingface-cli download \
+  --repo-type dataset SJTU-AI4Sports/SoccerWiki \
+  --local-dir ./datasets/SoccerWiki \
+  --local-dir-use-symlinks False \
+  --max-workers 2
+
+  
 
 ## SoccerAgent
 The basic structure is shown as following, with more details of implementation as shown here.

@@ -1,11 +1,12 @@
 import torch
 from einops import rearrange
 import sys
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox/unisoccer')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox/unisoccer")
 from model.MatchVision_classifier import MatchVision_Classifier
 from dataset.video_utils_siglip import read_frames_decord, set_transform
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox')
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent')
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox")
+sys.path.append(PROJECT_PATH)
 from utils.all_devices import unisoccer_device
 
 DEVICE = unisoccer_device

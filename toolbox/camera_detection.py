@@ -10,8 +10,7 @@ from typing import List, Dict, Tuple
 
 import torch
 from transformers import AutoProcessor, AutoModelForVision2Seq
-
-PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent" # Replace with actual project path
+from project_path import PROJECT_PATH
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:

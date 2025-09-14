@@ -1,6 +1,7 @@
 import torch
 import sys
-sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline/toolbox/unisoccer')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox/unisoccer")
 import json
 import os
 import random
@@ -172,4 +173,3 @@ class VideoCaptionDataset_Balanced(Dataset):
                 break
         caption_tensor = torch.tensor(caption_index, dtype=torch.long)
         return caption_tensor
-

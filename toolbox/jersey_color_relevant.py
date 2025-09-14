@@ -1,6 +1,7 @@
 from qwen_vl_utils import process_vision_info
 import sys, torch
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox")
 from utils.vlm_distribution import vlm_model, vlm_processor
 
 

@@ -17,7 +17,7 @@ import sys
 
 
 ######################## Parameters ########################
-PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent"
+from project_path import PROJECT_PATH
 sys.path.append(f"{PROJECT_PATH}/pipeline")
 from toolbox import *
 

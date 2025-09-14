@@ -3,7 +3,8 @@ import re
 import os
 import time
 from urllib.error import URLError
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox")
 from vlm import VLM
 
 def extract_timestamp(image, max_retries=3):
@@ -74,8 +75,9 @@ def SCORE_TIME_DETECTION(query, material):
             return "Error: Failed to extract middle frame from video"
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        os.makedirs("/home/work/wonjun/study/agent/SoccerAgent/log/cache", exist_ok=True)
-        image_path = f"/home/work/wonjun/study/agent/SoccerAgent/log/cache/SCORE_TIME_DETECTION_{timestamp}.jpg"
+        cache_dir = os.path.join(PROJECT_PATH, "log/cache")
+        os.makedirs(cache_dir, exist_ok=True)
+        image_path = os.path.join(cache_dir, f"SCORE_TIME_DETECTION_{timestamp}.jpg")
         cv2.imwrite(image_path, frame)
     else:
         return "Error: Unsupported file format"

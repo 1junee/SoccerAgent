@@ -1,5 +1,6 @@
 import sys, os
-sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline/toolbox/unisoccer')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox/unisoccer")
 import torch
 import json
 from einops import rearrange

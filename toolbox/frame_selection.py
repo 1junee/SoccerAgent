@@ -8,9 +8,10 @@ from datetime import datetime
 from transformers import CLIPProcessor, CLIPModel
 import ffmpeg
 import random
+from project_path import PROJECT_PATH
 
 def select_rand_frame(video_path):
-    output_dir = "/home/work/wonjun/study/agent/SoccerAgent/log/cache"
+    output_dir = os.path.join(PROJECT_PATH, "log/cache")
     
     os.makedirs(output_dir, exist_ok=True)
     
@@ -44,7 +45,9 @@ def select_rand_frame(video_path):
         cap.release()
 
 
-def FRAME_SELECTION(query, material, output_dir="YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/log/"):
+def FRAME_SELECTION(query, material, output_dir=None):
+    if output_dir is None:
+        output_dir = os.path.join(PROJECT_PATH, "log/")
 
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     os.makedirs(output_dir, exist_ok=True)

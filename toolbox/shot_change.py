@@ -3,8 +3,7 @@ from scenedetect.detectors import ContentDetector
 # from moviepy.editor import VideoFileClip
 from moviepy import *
 import os
-
-PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent" # Replace with actual project path
+from project_path import PROJECT_PATH
 
 def is_video_file(file_path):
     video_extensions = ['.mp4', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.webm']

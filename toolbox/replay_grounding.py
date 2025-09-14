@@ -5,8 +5,7 @@ import torch
 from PIL import Image
 import cv2
 import os
-
-PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent"  # Replace with your actual project path
+from project_path import PROJECT_PATH
 
 import subprocess
 def compress_video(input_video_path, output_video_path, target_width=224, target_height=400, target_fps=1, codec="libx264"):
@@ -116,4 +115,3 @@ def REPLAY_GROUNDING(query=None, material=[]):
     text = "There are five video clips in total. The first clip is a replay. Which of the other four clips is the one it is replaying? Reply with 'the 1st clip' or 'the 2nd clip' or 'the 3rd clip' or 'the 4th clip'."
     response = chat_video(text, instruction, material)
     return response
-

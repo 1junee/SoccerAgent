@@ -6,7 +6,7 @@ from PIL import Image
 import re
 import csv
 
-PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent"  # Replace with your actual project path
+from project_path import PROJECT_PATH  # dynamic project root
 def JERSEY_NUMBER_RECOGNITION(query=None, material=[]):
     if torch.cuda.is_available() and torch.cuda.device_count() > 0:
         device = torch.device(f"cuda:{torch.cuda.current_device()}")

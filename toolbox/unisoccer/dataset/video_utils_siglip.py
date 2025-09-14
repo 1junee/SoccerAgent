@@ -1,6 +1,7 @@
 import random
 import sys
-sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline/toolbox/unisoccer')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox/unisoccer")
 import io
 import av
 import cv2
@@ -93,4 +94,3 @@ def set_transform(
     # 创建 SiglipProcessor 实例
     processor = AutoProcessor.from_pretrained(model_name)
     return processor
-

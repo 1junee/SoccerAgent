@@ -1,5 +1,6 @@
 import sys
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox/unisoccer')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox/unisoccer")
 from inference.distribution import preprocessor, classifier, commentary_model
 import einops
 

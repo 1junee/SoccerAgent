@@ -3,8 +3,7 @@ from pathlib import Path
 import json
 from .utils.GroundingDINO.demo.inference_on_a_image import inference_on_a_image
 import cv2
-
-PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent"  # Replace with your actual project path
+from project_path import PROJECT_PATH
 
 
 def SEGMENT(query=None, material=[]):

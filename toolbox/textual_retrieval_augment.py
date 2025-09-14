@@ -6,9 +6,9 @@ from typing import List, Dict
 
 import torch
 from transformers import AutoProcessor, AutoModelForVision2Seq
+from project_path import PROJECT_PATH
 
 ######################## Parameters ########################
-PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent"
 
 # Use local Qwen2.5-VL-7B-Instruct for text generation
 QWEN_VL_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"

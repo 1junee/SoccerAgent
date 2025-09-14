@@ -2,7 +2,8 @@ from transformers import Qwen2_5_VLForConditionalGeneration, AutoTokenizer, Auto
 from qwen_vl_utils import process_vision_info
 import torch
 import sys
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox")
 # from utils.all_devices import vlm_device
 from utils.all_devices import vlm_device
 

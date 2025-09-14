@@ -4,7 +4,8 @@ from torch import nn
 import einops
 import contextlib
 import sys, os
-sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline/toolbox/unisoccer')
+from project_path import PROJECT_PATH
+sys.path.append(f"{PROJECT_PATH}/pipeline/toolbox/unisoccer")
 from model.matchvoice_Qformer import BertConfig, BertLMHeadModel
 from transformers.generation.logits_process import LogitsProcessor, LogitsProcessorList
 from typing import List
@@ -105,7 +106,7 @@ class matchvoice_model(nn.Module):
 
     @classmethod
     def init_video_Qformer(cls, num_query_token, vision_width, num_hidden_layers =2):
-        encoder_config = BertConfig.from_pretrained("YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline/toolbox/unisoccer/checkpoint/bert-base-uncased")
+        encoder_config = BertConfig.from_pretrained(os.path.join(PROJECT_PATH, "pipeline/toolbox/unisoccer/checkpoint/bert-base-uncased"))
         encoder_config.num_hidden_layers = num_hidden_layers
         encoder_config.encoder_width = vision_width
         # insert cross-attention layer every other block
