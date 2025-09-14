@@ -31,3 +31,7 @@
 .DS_Store
 
 *.pth
+
+# Datasets (ignore large synced datasets)
+/database/SoccerWiki/
+/benchmark/SoccerBench/
