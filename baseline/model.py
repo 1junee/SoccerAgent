@@ -53,11 +53,16 @@ class QwenVL(BaselineModel):
         Do not include any other text or explanations.
         """
 
+        # Choose a safe dtype and avoid FlashAttention2 to remove dependency
+        use_bf16 = torch.cuda.is_available() and getattr(torch.cuda, "is_bf16_supported", lambda: False)()
+        dtype = torch.bfloat16 if use_bf16 else (torch.float16 if torch.cuda.is_available() else torch.float32)
+        # Load on a single GPU to avoid multi-GPU rope/device mismatches
+        device_map = {"": 0} if torch.cuda.is_available() else None
         self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             model_path,
-            torch_dtype=torch.bfloat16,
-            attn_implementation="flash_attention_2",
-            device_map="auto",
+            torch_dtype=dtype,
+            attn_implementation="sdpa",
+            device_map=device_map,
         )
         self.processor = AutoProcessor.from_pretrained(model_path)
 
@@ -91,7 +96,20 @@ class QwenVL(BaselineModel):
             videos=video_inputs,
             padding=True,
             return_tensors="pt",
-        ).to(self.model.device)
+        )
+        dm = getattr(self.model, "hf_device_map", None)
+        if dm is None:
+            inputs = inputs.to(self.model.device)
+        else:
+            # If mapped to a single CUDA device, move inputs there explicitly
+            dev_set = {str(v) for v in dm.values()}
+            if len(dev_set) == 1:
+                sole = next(iter(dev_set))
+                # Normalize to torch device string
+                if sole.isdigit():
+                    sole = f"cuda:{sole}"
+                if sole.startswith("cuda"):
+                    inputs = inputs.to(sole)
 
         output_ids = self.model.generate(**inputs, max_new_tokens=max_tokens)
         generated_ids_trimmed = [
@@ -127,7 +145,18 @@ class QwenVL(BaselineModel):
             videos=video_inputs,
             padding=True,
             return_tensors="pt",
-        ).to(self.model.device)
+        )
+        dm = getattr(self.model, "hf_device_map", None)
+        if dm is None:
+            inputs = inputs.to(self.model.device)
+        else:
+            dev_set = {str(v) for v in dm.values()}
+            if len(dev_set) == 1:
+                sole = next(iter(dev_set))
+                if sole.isdigit():
+                    sole = f"cuda:{sole}"
+                if sole.startswith("cuda"):
+                    inputs = inputs.to(sole)
 
         output_ids = self.model.generate(**inputs, max_new_tokens=max_tokens)
         generated_ids_trimmed = [

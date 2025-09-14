@@ -24,7 +24,6 @@
 
 *.json
 *.xml
-*.csv
 *.log
 *.tmp
 
@@ -33,5 +32,5 @@
 *.pth
 
 # Datasets (ignore large synced datasets)
-/database/SoccerWiki/
-/benchmark/SoccerBench/
+/database/datasets/SoccerWiki/
+/database/datasets/SoccerBench/
