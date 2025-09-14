@@ -1,6 +1,6 @@
 import torch
 import sys
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox/unisoccer')
+sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline/toolbox/unisoccer')
 import json
 import os
 import random

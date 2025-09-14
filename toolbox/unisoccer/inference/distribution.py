@@ -96,14 +96,14 @@ class VideoClassifier:
             return self.classifier.get_logits(video_tensor).to("cpu")
 
 
-CHECKPOINT_PATH_CLASSIFICATION = "/home/work/wonjun/study/agent/SoccerAgent/toolbox/unisoccer/pretrained_classification.pth" # Refer to https://huggingface.co/Homie0609/UniSoccer/blob/main/pretrained_classification.pth
+CHECKPOINT_PATH_CLASSIFICATION = "PATH_of_UniSoccer_with_Pretrained_Classification_task" # Refer to https://huggingface.co/Homie0609/UniSoccer/blob/main/pretrained_classification.pth
 
 preprocessor = VideoPreprocessor(num_frames=30, sampling_method="middle", device=DEVICE)
 classifier = VideoClassifier(CHECKPOINT_PATH_CLASSIFICATION, DEVICE)
 
 
 from model.matchvoice_model_all_blocks import matchvoice_model_all_blocks
-CHECKPOINT_PATH_COMMENTARY = "/home/work/wonjun/study/agent/SoccerAgent/toolbox/unisoccer/downstream_commentary_all_open.pth" # Refer to https://huggingface.co/Homie0609/UniSoccer/blob/main/downstream_commentary_all_open.pth
+CHECKPOINT_PATH_COMMENTARY = "PATH_of_UniSoccer_with_Finetuned_Commentary_Generation_task" # Refer to https://huggingface.co/Homie0609/UniSoccer/blob/main/downstream_commentary_all_open.pth
 commentary_model = matchvoice_model_all_blocks(open_llm_decoder=True, num_features=768)
 state_dict = torch.load(CHECKPOINT_PATH_COMMENTARY, map_location="cpu")['state_dict']
 commentary_state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}

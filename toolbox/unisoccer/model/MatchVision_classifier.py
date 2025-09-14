@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox/unisoccer')
+sys.path.append('YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE/pipeline/toolbox/unisoccer')
 import torch
 import torch.nn as nn
 # from model.MatchVision_from_siglip import VisionTimesformer

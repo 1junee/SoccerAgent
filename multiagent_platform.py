@@ -1,7 +1,7 @@
 import csv
 import re, os
 import ast
-# from openai import OpenAI  # Old client (DeepSeek/OpenAI-compatible) kept for reference
+from openai import OpenAI
 import json
 from tqdm import tqdm
 import argparse
@@ -19,7 +19,6 @@ import sys
 ######################## Parameters ########################
 PROJECT_PATH = "/home/work/wonjun/study/agent/SoccerAgent"
 sys.path.append(f"{PROJECT_PATH}/pipeline")
-sys.path.append(PROJECT_PATH)  # for baseline imports
 from toolbox import *
 
 toolbox_functions = {
@@ -116,45 +115,37 @@ def generate_prompt(taskdecompositionprompt, query, additional_material):
     prompt += f"Adittional Material: {additional_material}\n"
     return prompt
 
-# New LLM: QwenVL (local/HF). Old DeepSeek/OpenAI path above kept commented.
-from baseline.model import QwenVL
-QWEN_VL_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
-qwen_client = QwenVL(QWEN_VL_MODEL_ID)
-
 def workflow(input_text, Instruction, follow_up_prompt=None, api_key="your-deepseek-api-key", max_tokens_followup=1500):
-    # Old implementation using OpenAI client (commented for reference)
-    # client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
-    # completion = client.chat.completions.create(
-    #     model="deepseek-chat",
-    #     messages=[{"role": "system", "content": Instruction}, {"role": "user", "content": input_text}],
-    #     stream=False,
-    # )
-    # first_round_reply = completion.choices[0].message.content
-    # if follow_up_prompt:
-    #     completion = client.chat.completions.create(
-    #         model="deepseek-chat",
-    #         messages=[
-    #             {"role": "system", "content": Instruction},
-    #             {"role": "user", "content": input_text},
-    #             {"role": "assistant", "content": first_round_reply},
-    #             {"role": "user", "content": follow_up_prompt}
-    #         ],
-    #         max_tokens=max_tokens_followup,
-    #         stream=False
-    #     )
-    #     second_round_reply = completion.choices[0].message.content
-    #     return first_round_reply, second_round_reply
-    # else:
-    #     return first_round_reply
 
-    # New implementation using QwenVL: text-only by passing empty image list
-    prompt = f"{Instruction}\n\n{input_text}"
-    first_round_reply = qwen_client.chat_img(prompt, [], max_tokens=512)
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    
+    completion = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[
+            {"role": "system", "content": Instruction},
+            {"role": "user", "content": input_text}
+        ],
+        stream=False 
+    )
+    
+    first_round_reply = completion.choices[0].message.content
+    
     if follow_up_prompt:
-        followup = f"{Instruction}\n\n{input_text}\n\nAssistant: {first_round_reply}\n\nUser: {follow_up_prompt}"
-        second_round_reply = qwen_client.chat_img(followup, [], max_tokens=max_tokens_followup)
+        completion = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[
+                {"role": "system", "content": Instruction},
+                {"role": "user", "content": input_text},
+                {"role": "assistant", "content": first_round_reply},
+                {"role": "user", "content": follow_up_prompt}
+            ],
+            max_tokens=max_tokens_followup,
+            stream=False
+        )
+        second_round_reply = completion.choices[0].message.content
         return first_round_reply, second_round_reply
-    return first_round_reply
+    else:
+        return first_round_reply
     
 def parse_input(input_str):
     known_info = re.findall(r'\$(.*?)\$', input_str)
@@ -290,63 +281,48 @@ Please make sure that your answer is consistent with the total process of the ex
 
 
 def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a helpful multi-agent assistant that can answer questions about soccer.", api_key="sk-qsB0dn28i0QhQw58099e30554bA94b3dBc96D0287bEaC563"):
-    # Old implementation using OpenAI client (commented for reference)
-    # client = OpenAI(api_key=api_key, base_url="https://az.gptplus5.com/v1")
-    # conversation_history = [
-    #     {"role": "system", "content": Instruction},
-    #     {"role": "user", "content": input_text}
-    # ]
-    # total_process = ""
-    # while True:
-    #     completion = client.chat.completions.create(model="deepseek-chat", messages=conversation_history)
-    #     model_reply = completion.choices[0].message.content
-    #     conversation_history.append({"role": "assistant", "content": model_reply})
-    #     total_process += model_reply
-    #     tool, query, material = parse_call_response(model_reply)
-    #     if tool != "LLM":
-    #         material = ast.literal_eval(material) if material is not None else []
-    #         user_execution = execute_tool_call(tool, query, material, toolbox_functions)
-    #         conversation_history.append({"role": "user", "content": user_execution})
-    #         total_process += user_execution
-    #     if "<EndCall>" in model_reply:
-    #         if tool == "LLM":
-    #             llm_prompt = generate_LLM_prompt(query)
-    #             conversation_history.append({"role": "assistant", "content": llm_prompt})
-    #             completion = client.chat.completions.create(model="deepseek-chat", messages=conversation_history)
-    #             model_reply = completion.choices[0].message.content
-    #             total_process += model_reply
-    #         else:
-    #             tool, query, material = parse_call_response(model_reply)
-    #             material = ast.literal_eval(material) if material is not None else []
-    #             user_execution = execute_tool_call(tool, query, material, toolbox_functions)
-    #             total_process += user_execution
-    #         return total_process
-
-    # New implementation using QwenVL by maintaining a textual context
-    context = f"{Instruction}\n\n{input_text}"
+    client = OpenAI(api_key=api_key, base_url="https://az.gptplus5.com/v1")
+    # Initialize the conversation history with the system instruction and user input
+    conversation_history = [
+        {"role": "system", "content": Instruction},
+        {"role": "user", "content": input_text}
+    ]
     total_process = ""
     while True:
-        model_reply = qwen_client.chat_img(context, [], max_tokens=512)
+        # Generate a response from the model
+        completion = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=conversation_history
+        )
+        # Get the model's reply
+        model_reply = completion.choices[0].message.content
+        conversation_history.append({"role": "assistant", "content": model_reply})
         total_process += model_reply
         tool, query, material = parse_call_response(model_reply)
         if tool != "LLM":
             material = ast.literal_eval(material) if material is not None else []
             user_execution = execute_tool_call(tool, query, material, toolbox_functions)
-            # Append the execution as if returned by the user/environment
-            context = f"{context}\n\n<StepResult>\n    <Answer>{user_execution}</Answer>\n</StepResult>"
+            conversation_history.append({"role": "user", "content": user_execution})
             total_process += user_execution
         # Check if the reply contains <EndCall>
         if "<EndCall>" in model_reply:
             if tool == "LLM":
+                # Generate a prompt for the LLM to answer the question
                 llm_prompt = generate_LLM_prompt(query)
-                context = f"{context}\n\n{llm_prompt}"
-                final_reply = qwen_client.chat_img(context, [], max_tokens=512)
-                total_process += final_reply
+                conversation_history.append({"role": "assistant", "content": llm_prompt})
+                completion = client.chat.completions.create(
+                    model="deepseek-chat",
+                    messages=conversation_history
+                )
+                # Get the model's reply
+                model_reply = completion.choices[0].message.content
+                total_process += model_reply
             else:
                 tool, query, material = parse_call_response(model_reply)
                 material = ast.literal_eval(material) if material is not None else []
                 user_execution = execute_tool_call(tool, query, material, toolbox_functions)
                 total_process += user_execution
+            
             return total_process
 
 ######################## Some Basic Prompt Information ########################
