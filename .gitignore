@@ -20,7 +20,7 @@
 *.zip
 *.tar
 *.tar.gz
-
+database/Game_dataset.tar.gz
 
 *.json
 *.xml
