@@ -73,7 +73,7 @@ class QwenVL(BaselineModel):
             conversation[1]["content"].append(
                 {
                     "type": "video", 
-                    "video": "file://" + video_path[i],
+                    "video": video_path[i],
                     "max_pixels": 360 * 640,
                     "fps": 1.0,
                 }
@@ -112,7 +112,7 @@ class QwenVL(BaselineModel):
         ]
         for i in range(len(image_path)):
             conversation[1]["content"].append(
-                {"type": "image", "image": "file://" + image_path[i] }
+                {"type": "image", "image": image_path[i] }
             )
         conversation[1]["content"].append(
             {"type": "text", "text": input_text}
