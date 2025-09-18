@@ -19,7 +19,7 @@ import sys
 ######################## Parameters ########################
 from project_path import PROJECT_PATH
 sys.path.append(f"{PROJECT_PATH}/pipeline")
-from toolbox import *
+from pipeline.toolbox import *
 
 toolbox_functions = {
     "Textual Entity Search": TEXTUAL_ENTITY_SEARCH,
