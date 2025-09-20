@@ -86,6 +86,15 @@ SoccerWiki could be found in [🤗SoccerWiki](https://huggingface.co/datasets/SJ
 ### Step 2: Distribute Toolbox
 In our official codes, there are some tools we need to invoke, if you want to run the same baseline as ours, you have to adjust the codes with the distributions as following. If you want to add some of your own tools, don't forget to add them into `./toolbox/__init__.py` and `./toolbox.csv`. Also, you need to replace all the `YOUR_PROJECT_PATH` and `YOUR_FOLDER_PATH_TO_SOCCERAGENT_CODEBASE` to your exact code base path.
 
+### API 관련 변경해야하는 부분
+multiagent_platform.py
+plaform_full_version.py
+game_search.py
+game_retrieval.py
+textual_retrieval_augment.py
+segment.py
+textual_entity_search.py
+
 #### 1. Camera Detection
 In *./toolbox/camera_detection.py*:
 Line 35, 37: replace with your gpt-4o API key and URL.
