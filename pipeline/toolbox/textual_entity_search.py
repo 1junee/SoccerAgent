@@ -9,47 +9,34 @@ from transformers import AutoProcessor, AutoModelForVision2Seq
 from project_path import PROJECT_PATH
 
 ######################## Parameters ########################
-
-# Use local Qwen2.5-VL-7B-Instruct for text generation
-QWEN_VL_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
-
-
-@lru_cache(maxsize=1)
-def _load_qwen_vl(model_id: str = QWEN_VL_MODEL_ID):
-    processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
-    model = AutoModelForVision2Seq.from_pretrained(
-        model_id,
-        torch_dtype="auto",
-        device_map="auto",
-        trust_remote_code=True,
-    ).eval()
-    return processor, model
-
-
-def _qwen_chat(messages: List[Dict], max_new_tokens: int = 512) -> str:
-    processor, model = _load_qwen_vl()
-    text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    inputs = processor(text=[text], return_tensors="pt").to(model.device)
-    with torch.inference_mode():
-        out_ids = model.generate(**inputs, max_new_tokens=max_new_tokens)
-    return processor.batch_decode(out_ids, skip_special_tokens=True)[0]
+client = OpenAI(api_key="your-deepseek-api-key", base_url="https://api.deepseek.com")
 
 def workflow(input_text, Instruction, follow_up_prompt=None, max_tokens_followup=1500):
-    # First turn
-    messages = [
-        {"role": "system", "content": Instruction},
-        {"role": "user", "content": input_text},
-    ]
-    first_round_reply = _qwen_chat(messages, max_new_tokens=512)
 
-    if follow_up_prompt:
-        messages = [
+    completion = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[
             {"role": "system", "content": Instruction},
-            {"role": "user", "content": input_text},
-            {"role": "assistant", "content": first_round_reply},
-            {"role": "user", "content": follow_up_prompt},
-        ]
-        second_round_reply = _qwen_chat(messages, max_new_tokens=max_tokens_followup)
+            {"role": "user", "content": input_text}
+        ],
+        stream=False 
+    )
+    
+    first_round_reply = completion.choices[0].message.content
+    
+    if follow_up_prompt:
+        completion = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[
+                {"role": "system", "content": Instruction},
+                {"role": "user", "content": input_text},
+                {"role": "assistant", "content": first_round_reply},
+                {"role": "user", "content": follow_up_prompt}
+            ],
+            max_tokens=max_tokens_followup,
+            stream=False
+        )
+        second_round_reply = completion.choices[0].message.content
         return first_round_reply, second_round_reply
     else:
         return first_round_reply
@@ -184,4 +171,3 @@ def TEXTUAL_ENTITY_SEARCH(question, material=None, base_folder = os.path.join(PR
     else:
         json_path = find_json_path(base_folder, entity_type, entity_name)
         return f"The wiki information of this entity could be found in {json_path}."
-    
