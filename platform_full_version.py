@@ -6,8 +6,10 @@ import argparse
 from multiagent_platform import EXECUTE_TOOL_CHAIN
 from openai import OpenAI
 
+from dotenv import load_dotenv
+load_dotenv()
 
-client = OpenAI(api_key="your-deepseek-api-key", base_url="https://api.deepseek.com")
+client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://openrouter.ai/api/v1")
 
 INSTRUCTION = f"""
 You are a football expert. You are provided with a question 'Q' and four options 'O1', 'O2', 'O3', and 'O4'.
@@ -18,7 +20,7 @@ Do not include any other text or explanations!!!
 
 def workflow(input_text, Instruction=INSTRUCTION, follow_up_prompt=None, max_tokens_followup=1500):
     completion = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek/deepseek-chat-v3-0324:free",
         messages=[
             {"role": "system", "content": Instruction},
             {"role": "user", "content": input_text}

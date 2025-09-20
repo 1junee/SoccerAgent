@@ -27,7 +27,7 @@ def main():
 
     # Create the output file if it doesn't exist
     if not os.path.exists(args.output_file):
-        df = pd.DataFrame(columns=['answer', 'option_num'])
+        df = pd.DataFrame(columns=['answer', 'option_num', 'free_answer'])
         df.to_csv(args.output_file, index=False)
 
     # Running the QA test with the given model and file

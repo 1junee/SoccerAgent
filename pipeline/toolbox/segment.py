@@ -7,8 +7,8 @@ from project_path import PROJECT_PATH
 
 
 def SEGMENT(query=None, material=[]):
-    config_file = f"{PROJECT_PATH}/toolbox/utils/GroundingDINO/groundingdino/config/GroundingDINO_SwinB_cfg.py"
-    model_weights = f"{PROJECT_PATH}/toolbox/utils/GroundingDINO/groundingdino/config/groundingdino_swinb_cogcoor.pth"
+    config_file = f"{PROJECT_PATH}/pipeline/toolbox/utils/GroundingDINO/groundingdino/config/GroundingDINO_SwinB_cfg.py"
+    model_weights = f"{PROJECT_PATH}/pipeline/toolbox/utils/GroundingDINO/groundingdino/config/groundingdino_swinb_cogcoor.pth"
     image_path = material[0]
     text = query
     output_path = f"{PROJECT_PATH}/log/segment" # replace with your helper file path to save the output image

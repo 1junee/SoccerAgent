@@ -115,12 +115,14 @@ def generate_prompt(taskdecompositionprompt, query, additional_material):
     prompt += f"Adittional Material: {additional_material}\n"
     return prompt
 
-def workflow(input_text, Instruction, follow_up_prompt=None, api_key="your-deepseek-api-key", max_tokens_followup=1500):
+from dotenv import load_dotenv
+load_dotenv()
+def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("DEEPSEEK_API_KEY"), max_tokens_followup=1500):
 
-    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
     
     completion = client.chat.completions.create(
-        model="deepseek-chat",
+        model="deepseek/deepseek-chat-v3-0324:free",
         messages=[
             {"role": "system", "content": Instruction},
             {"role": "user", "content": input_text}
@@ -132,7 +134,7 @@ def workflow(input_text, Instruction, follow_up_prompt=None, api_key="your-deeps
     
     if follow_up_prompt:
         completion = client.chat.completions.create(
-            model="deepseek-chat",
+            model="deepseek/deepseek-chat-v3-0324:free",
             messages=[
                 {"role": "system", "content": Instruction},
                 {"role": "user", "content": input_text},
@@ -280,8 +282,8 @@ Please make sure that your answer is consistent with the total process of the ex
 
 
 
-def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a helpful multi-agent assistant that can answer questions about soccer.", api_key="sk-qsB0dn28i0QhQw58099e30554bA94b3dBc96D0287bEaC563"):
-    client = OpenAI(api_key=api_key, base_url="https://az.gptplus5.com/v1")
+def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a helpful multi-agent assistant that can answer questions about soccer.", api_key=os.getenv("DEEPSEEK_API_KEY")):
+    client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
     # Initialize the conversation history with the system instruction and user input
     conversation_history = [
         {"role": "system", "content": Instruction},
@@ -291,7 +293,7 @@ def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a hel
     while True:
         # Generate a response from the model
         completion = client.chat.completions.create(
-            model="deepseek-chat",
+            model="deepseek/deepseek-chat-v3-0324:free",
             messages=conversation_history
         )
         # Get the model's reply
@@ -311,7 +313,7 @@ def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a hel
                 llm_prompt = generate_LLM_prompt(query)
                 conversation_history.append({"role": "assistant", "content": llm_prompt})
                 completion = client.chat.completions.create(
-                    model="deepseek-chat",
+                    model="deepseek/deepseek-chat-v3-0324:free",
                     messages=conversation_history
                 )
                 # Get the model's reply

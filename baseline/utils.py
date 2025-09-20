@@ -10,19 +10,66 @@ from tqdm import tqdm
 import cv2
 
 
-def extract_option(reply):
-    if reply:
-        if reply[0] in 'ABCD':
-            mapping = {'A': 'O1', 'B': 'O2', 'C': 'O3', 'D': 'O4'}
-            reply = mapping[reply[0]] + reply[1:]
-
-    options = re.findall(r'O[1-9]', reply)
-    unique_options = list(set(options))
-    
-    if len(unique_options) == 1:
-        return unique_options[0]
-    else:
+def _normalize_option_token(token: str | None) -> str | None:
+    if not token:
         return None
+    token = token.strip()
+    if not token:
+        return None
+    mapping = {'A': 'O1', 'B': 'O2', 'C': 'O3', 'D': 'O4'}
+    first = token[0].upper()
+    if first in mapping:
+        return mapping[first]
+    match = re.search(r'O([1-9])', token.upper())
+    if match:
+        return f"O{match.group(1)}"
+    return None
+
+
+def extract_answer_components(reply: str | None) -> tuple[str | None, str | None]:
+    """Return (free_form_answer, option_choice) parsed from model reply.
+
+    Works with both the legacy format that only returned an option and the
+    updated prompt that includes labelled subjective/objective answers.
+    """
+    if not reply:
+        return None, None
+
+    text = reply.strip()
+    if not text:
+        return None, None
+
+    # Capture labelled sections like "Subjective Answer:" and "Option:"
+    free_form = None
+    option = None
+
+    labelled_free = re.search(r'(?:Subjective|Free)[^:]*:\s*(.*?)(?:\n|$)', text, re.IGNORECASE)
+    if labelled_free:
+        free_form = labelled_free.group(1).strip()
+
+    labelled_option = re.search(r'(?:Option|객관식)[^:]*:\s*([A-D]|O[1-9])', text, re.IGNORECASE)
+    if labelled_option:
+        option = _normalize_option_token(labelled_option.group(1))
+
+    if option is None:
+        option = _normalize_option_token(text)
+
+    if free_form is None and option is not None:
+        before_option = text.split(labelled_option.group(0))[0].strip() if labelled_option else text
+        if before_option and before_option.upper() not in {option, option.replace('O', '')}:
+            free_form = before_option
+
+    if free_form:
+        free_form = free_form.strip()
+        if _normalize_option_token(free_form) == option:
+            free_form = None
+
+    return free_form or None, option
+
+
+def extract_option(reply):
+    _, option = extract_answer_components(reply)
+    return option
 
 
 def count_csv_rows(file_path):
@@ -30,6 +77,24 @@ def count_csv_rows(file_path):
         reader = csv.reader(file)
         row_count = sum(1 for row in reader)
     return row_count - 1
+
+
+def ensure_csv_has_column(file_path: str, column_name: str) -> None:
+    if not os.path.exists(file_path):
+        return
+    with open(file_path, mode='r', encoding='utf-8', newline='') as file:
+        rows = list(csv.reader(file))
+    if not rows:
+        return
+    header = rows[0]
+    if column_name in header:
+        return
+    header.append(column_name)
+    for row in rows[1:]:
+        row.append('')
+    with open(file_path, mode='w', encoding='utf-8', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(rows)
 
 
 def compress_video(input_path, output_path, crf=28):

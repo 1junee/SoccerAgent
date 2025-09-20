@@ -9,7 +9,18 @@ from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
 from qwen_vl_utils import process_vision_info
 import openai
 from openai import OpenAI
-from utils import encode_image, encode_video, extract_option, count_csv_rows, sort_files_by_number_in_name, compress_video, compress_image, videolist2imglist
+from utils import (
+    encode_image,
+    encode_video,
+    extract_option,
+    extract_answer_components,
+    count_csv_rows,
+    sort_files_by_number_in_name,
+    compress_video,
+    compress_image,
+    videolist2imglist,
+    ensure_csv_has_column,
+)
 
 
 class BaselineModel:
@@ -47,11 +58,20 @@ class BaselineModel:
 
 class QwenVL(BaselineModel):
     def __init__(self, model_path):
-        self.instruction = f"""
-        You are a football expert. You are provided with a question 'Q' and multiple options like: 'O1', 'O2', 'O3', 'O4'...
-        Please answer the question with one option that best matches the question (replay with 'O1', 'O2', 'O3', 'O4'...). 
-        Do not include any other text or explanations.
-        """
+        self.instruction = (
+            "You are a football expert. You are provided with a question 'Q' and multiple options such as 'O1', 'O2', 'O3', 'O4'...\n"
+            "Respond strictly using the following format:\n"
+            "Subjective Answer: <your concise free-form answer or reasoning>\n"
+            "Option: <exactly one of O1, O2, O3, ... corresponding to the best choice>\n"
+            "If you are uncertain, you must still pick the single most plausible option.\n"
+            "Never answer with N/A or text outside the listed option labels. Do not add any other text outside of this format."
+        )
+        self.format_reminder = (
+            "Please respond in this exact format:\n"
+            "Subjective Answer: <your concise free-form answer or reasoning>\n"
+            "Option: <exactly one of O1, O2, O3, ...>\n"
+            "You must choose one provided option label even if you are unsure; never reply with N/A."
+        )
 
         self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             model_path,
@@ -145,6 +165,8 @@ class QwenVL(BaselineModel):
         data = data[num:]
         if data == []:
             return
+        ensure_csv_has_column(csv_file, 'free_answer')
+
         for item in tqdm(data):
             question = item["Q"]
             options = []
@@ -156,6 +178,7 @@ class QwenVL(BaselineModel):
                 if options[i-1]:
                     prompt += f"O{i}: {options[i-1]}\n"
                     option_num += 1
+            prompt += f"\n{self.format_reminder}\n"
             
             material_path = item["materials"]
             if material_path:
@@ -169,10 +192,14 @@ class QwenVL(BaselineModel):
                     reply = self.chat_video(prompt, material_path)
             else:
                 reply = self.chat_img(prompt, [])
-            answer = extract_option(reply)
+            free_answer, option_choice = extract_answer_components(reply)
+            answer = option_choice if option_choice else extract_option(reply)
+            if answer is None:
+                answer = extract_option(free_answer)
+            writer_row = [answer, option_num, free_answer or reply]
             with open(csv_file, "a", newline='') as csvfile:
                 writer = csv.writer(csvfile)
-                writer.writerow([answer, option_num])
+                writer.writerow(writer_row)
         return
 
     

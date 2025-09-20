@@ -37,7 +37,11 @@ database/Game_dataset.tar.gz
 
 
 Qwen2.5-VL/
+GroundingDINO/
 
 
 *.pyc
 __pycache__/
+
+
+.env
