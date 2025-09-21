@@ -3,6 +3,7 @@ from tqdm import tqdm
 import argparse
 from functools import lru_cache
 from typing import List, Dict
+from openai import OpenAI
 
 import torch
 from transformers import AutoProcessor, AutoModelForVision2Seq
@@ -13,7 +14,7 @@ from project_path import PROJECT_PATH
 from dotenv import load_dotenv
 load_dotenv()
 
-client = OpenAI(api_key="DEEPSEEK_API_KEY", base_url="https://openrouter.ai/api/v1")
+client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://openrouter.ai/api/v1")
 
 def workflow(input_text, Instruction, follow_up_prompt=None, max_tokens_followup=1500):
 

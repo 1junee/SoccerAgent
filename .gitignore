@@ -31,9 +31,9 @@ database/Game_dataset.tar.gz
 
 *.pth
 
-# Datasets (ignore large synced datasets)
-/database/datasets/SoccerWiki/
-/database/datasets/SoccerBench/
+
+SoccerWiki/
+SoccerBench/
 
 
 Qwen2.5-VL/
