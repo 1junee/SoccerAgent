@@ -40,10 +40,10 @@ class matchvoice_model_all_blocks(nn.Module):
     def __init__(self,
                  # Visual Encoder
                  load_checkpoint = True,
-                 visual_encoder_checkpoint = os.path.join(PROJECT_PATH, "pipeline/toolbox/unisoccer/checkpoint/downstream_commentary.pth"),
+                 visual_encoder_checkpoint = os.path.join(PROJECT_PATH, "pipeline/toolbox/unisoccer/checkpoints/downstream_commentary_all_open.pth"),
                  # LLM part
-                 llm_ckpt = os.path.join(PROJECT_PATH, "pipeline/toolbox/unisoccer/checkpoint/Meta-Llama-3-8B-Instruct"),
-                 tokenizer_ckpt = os.path.join(PROJECT_PATH, "pipeline/toolbox/unisoccer/checkpoint/Meta-Llama-3-8B-Instruct"),
+                 llm_ckpt = os.path.join(PROJECT_PATH, "pipeline/toolbox/unisoccer/checkpoints/Meta-Llama-3-8B-Instruct"),
+                 tokenizer_ckpt = os.path.join(PROJECT_PATH, "pipeline/toolbox/unisoccer/checkpoints/Meta-Llama-3-8B-Instruct"),
                  # Q-former part
                  max_frame_pos = 128,
                  window = 30,
@@ -145,7 +145,7 @@ class matchvoice_model_all_blocks(nn.Module):
 
     @classmethod
     def init_video_Qformer(cls, num_query_token, vision_width, num_hidden_layers =2):
-        encoder_config = BertConfig.from_pretrained(os.path.join(PROJECT_PATH, "pipeline/toolbox/unisoccer/checkpoint/bert-base-uncased"))
+        encoder_config = BertConfig.from_pretrained(os.path.join(PROJECT_PATH, "pipeline/toolbox/unisoccer/checkpoints/bert-base-uncased"))
         encoder_config.num_hidden_layers = num_hidden_layers
         encoder_config.encoder_width = vision_width
         # insert cross-attention layer every other block
