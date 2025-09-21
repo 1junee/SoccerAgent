@@ -4,6 +4,7 @@ import argparse
 from functools import lru_cache
 from typing import List, Dict
 from openai import OpenAI
+import os
 
 import torch
 from transformers import AutoProcessor, AutoModelForVision2Seq
