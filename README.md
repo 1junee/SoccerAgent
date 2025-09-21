@@ -20,7 +20,22 @@ pip install -r requirements.txt
 pip install huggingface-hub
 hf download Qwen/Qwen2.5-VL-7B-Instruct --local-dir ./Qwen2.5-VL
 huggingface-cli download Qwen/Qwen2.5-VL-7B-Instruct --local-dir ./Qwen2.5-VL
+
+
+
+mkdir -p /home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox/unisoccer/checkpoint
+huggingface-cli download \
+  --repo-type model meta-llama/Meta-Llama-3-8B-Instruct \
+  --local-dir /home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox/unisoccer/checkpoint/Meta-Llama-3-8B-Instruct \
+  --local-dir-use-symlinks False
+huggingface-cli download \
+  --repo-type model bert-base-uncased \
+  --local-dir /home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox/unisoccer/checkpoint/bert-base-uncased \
+  --local-dir-use-symlinks False
+
 ```
+
+
 
 # 1) 도구 설치 (없다면)
 pip install -U "huggingface_hub[cli]"
