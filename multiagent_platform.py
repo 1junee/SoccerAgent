@@ -109,10 +109,12 @@ def csv_to_task_string(csv_path=os.path.join(PROJECT_PATH, "pipeline/tasks.csv")
     
     return "\n".join(result)
 
-def generate_prompt(taskdecompositionprompt, query, additional_material):
+def generate_prompt(taskdecompositionprompt, query, additional_material, options=None):
     prompt = taskdecompositionprompt
     prompt += f"\nQuery: {query}\n"
     prompt += f"Adittional Material: {additional_material}\n"
+    if options:
+        prompt += f"Options: {options}\n"
     return prompt
 
 from dotenv import load_dotenv
@@ -156,7 +158,7 @@ def parse_input(input_str):
     
     return (known_info, tool_chain)
 
-def generate_prompt_execution(query, material, response, toolbox):
+def generate_prompt_execution(query, material, response, toolbox, options=None):
     prompt_execution = f"""As a multi-agent core in the Soccer Question Answering Assistant, you are required to execute the following tool chain to answer the question:
 
 "{query}"
@@ -164,6 +166,10 @@ def generate_prompt_execution(query, material, response, toolbox):
 with the following additional material:
 
 {material}
+
+with the candidate options:
+
+{options if options else 'None'}
 
 with the known info as:
 
@@ -405,8 +411,11 @@ Tool Chain: [*Vision Language Model* -> *Entity Recognition* -> *Text Retrieval 
 6. Try your best to decompose the question and identify the required tools, you can first reference the common QA tasks to get some ideas. If the template fits the question, you can directly use the recommended tool chain. If not, you can try to decompose the question and identify the required tools.
 """
 
-def EXECUTE_TOOL_CHAIN(query, material):
-    prompt = generate_prompt(TaskDecompositionPrompt, query, material)
+def EXECUTE_TOOL_CHAIN(query, material, options=None):
+    prompt = generate_prompt(TaskDecompositionPrompt, query, material, options=options)
     res = workflow(input_text=prompt, Instruction="You are an expert in soccer.")
-    result = execute_tool_chain(generate_prompt_execution(query, material, res, toolbox_descriptions), toolbox_functions)
+    result = execute_tool_chain(
+        generate_prompt_execution(query, material, res, toolbox_descriptions, options=options),
+        toolbox_functions,
+    )
     return result
