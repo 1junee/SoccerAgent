@@ -17,10 +17,10 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://openrouter.ai/api/v1")
 
-def workflow(input_text, Instruction, follow_up_prompt=None, max_tokens_followup=1500):
+def workflow(input_text, Instruction, follow_up_prompt=None, max_tokens_followup=16):
 
     completion = client.chat.completions.create(
-        model="deepseek/deepseek-chat-v3-0324:free",
+        model="deepseek/deepseek-chat-v3-0324",
         messages=[
             {"role": "system", "content": Instruction},
             {"role": "user", "content": input_text}
@@ -32,7 +32,7 @@ def workflow(input_text, Instruction, follow_up_prompt=None, max_tokens_followup
     
     if follow_up_prompt:
         completion = client.chat.completions.create(
-            model="deepseek/deepseek-chat-v3-0324:free",
+            model="deepseek/deepseek-chat-v3-0324",
             messages=[
                 {"role": "system", "content": Instruction},
                 {"role": "user", "content": input_text},

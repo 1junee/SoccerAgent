@@ -8,6 +8,7 @@ from .jersey_color_relevant import JERSEY_COLOR_VLM
 from .frame_selection import FRAME_SELECTION
 from .score_time_det import SCORE_TIME_DETECTION
 from .foul_recognition import FOUL_RECOGNITION
+from .closeqa import CLOSE_QA
 
 from .shot_change import SHOT_CHANGE
 from .face_rec import FACE_RECOGNITION
@@ -34,5 +35,6 @@ __all__ = [
     "REPLAY_GROUNDING",
     "FRAME_SELECTION",
     "SCORE_TIME_DETECTION",
-    "FOUL_RECOGNITION"
+    "FOUL_RECOGNITION",
+    "CLOSE_QA",
 ]

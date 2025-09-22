@@ -39,7 +39,8 @@ toolbox_functions = {
     "Replay Grounding": REPLAY_GROUNDING,
     "Score and Time Recognition": SCORE_TIME_DETECTION,
     "Frame Selection": FRAME_SELECTION,
-    "Foul Recognition": FOUL_RECOGNITION
+    "Foul Recognition": FOUL_RECOGNITION,
+    "CloseQA": CLOSE_QA,
 }
 
 import os
@@ -119,12 +120,12 @@ def generate_prompt(taskdecompositionprompt, query, additional_material, options
 
 from dotenv import load_dotenv
 load_dotenv()
-def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("DEEPSEEK_API_KEY"), max_tokens_followup=1500):
+def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("DEEPSEEK_API_KEY"), max_tokens_followup=16):
 
     client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
     
     completion = client.chat.completions.create(
-        model="deepseek/deepseek-chat-v3-0324:free",
+        model="deepseek/deepseek-chat-v3-0324",
         messages=[
             {"role": "system", "content": Instruction},
             {"role": "user", "content": input_text}
@@ -136,7 +137,7 @@ def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("
     
     if follow_up_prompt:
         completion = client.chat.completions.create(
-            model="deepseek/deepseek-chat-v3-0324:free",
+            model="deepseek/deepseek-chat-v3-0324",
             messages=[
                 {"role": "system", "content": Instruction},
                 {"role": "user", "content": input_text},
@@ -299,7 +300,7 @@ def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a hel
     while True:
         # Generate a response from the model
         completion = client.chat.completions.create(
-            model="deepseek/deepseek-chat-v3-0324:free",
+            model="deepseek/deepseek-chat-v3-0324",
             messages=conversation_history
         )
         # Get the model's reply
@@ -319,7 +320,7 @@ def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a hel
                 llm_prompt = generate_LLM_prompt(query)
                 conversation_history.append({"role": "assistant", "content": llm_prompt})
                 completion = client.chat.completions.create(
-                    model="deepseek/deepseek-chat-v3-0324:free",
+                    model="deepseek/deepseek-chat-v3-0324",
                     messages=conversation_history
                 )
                 # Get the model's reply

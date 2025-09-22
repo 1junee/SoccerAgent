@@ -30,7 +30,7 @@ def _qwen_chat(messages: List[Dict], max_new_tokens: int = 256) -> str:
     return processor.batch_decode(out_ids, skip_special_tokens=True)[0]
 
 
-def workflow(input_text, Instruction="You are an expert of soccer referee.", follow_up_prompt=None, max_tokens_followup=1500):
+def workflow(input_text, Instruction="You are an expert of soccer referee.", follow_up_prompt=None, max_tokens_followup=16):
     # First turn
     messages = [
         {"role": "system", "content": Instruction},

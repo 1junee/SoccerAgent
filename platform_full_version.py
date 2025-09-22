@@ -18,9 +18,9 @@ Please answer the question with one option that best matches the question (repla
 Do not include any other text or explanations!!!
 """
 
-def workflow(input_text, Instruction=INSTRUCTION, follow_up_prompt=None, max_tokens_followup=1500):
+def workflow(input_text, Instruction=INSTRUCTION, follow_up_prompt=None, max_tokens_followup=16):
     completion = client.chat.completions.create(
-        model="deepseek/deepseek-chat-v3-0324:free",
+        model="deepseek/deepseek-chat-v3-0324",
         messages=[
             {"role": "system", "content": Instruction},
             {"role": "user", "content": input_text}
@@ -116,4 +116,3 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     process_json_file(args.input_file, args.output_file)
-
