@@ -109,17 +109,11 @@ def csv_to_task_string(csv_path=os.path.join(PROJECT_PATH, "pipeline/tasks.csv")
     
     return "\n".join(result)
 
-def generate_prompt(taskdecompositionprompt, query, additional_material, options=None):
+def generate_prompt(taskdecompositionprompt, query, additional_material):
     prompt = taskdecompositionprompt
     prompt += f"\nQuery: {query}\n"
     prompt += f"Adittional Material: {additional_material}\n"
-    if options:
-        prompt += f"Options: {options}\n"
     return prompt
-
-
-from dotenv import load_dotenv
-load_dotenv()
 
 def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("DEEPSEEK_API_KEY"), max_tokens_followup=1500):
 
@@ -160,7 +154,7 @@ def parse_input(input_str):
     
     return (known_info, tool_chain)
 
-def generate_prompt_execution(query, material, response, toolbox, options=None):
+def generate_prompt_execution(query, material, response, toolbox, options):
     prompt_execution = f"""As a multi-agent core in the Soccer Question Answering Assistant, you are required to execute the following tool chain to answer the question:
 
 "{query}"
@@ -169,9 +163,9 @@ with the following additional material:
 
 {material}
 
-with the candidate options:
+There are several options:
 
-{options if options else 'None'}
+{options}
 
 with the known info as:
 
@@ -306,8 +300,6 @@ def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a hel
         )
         # Get the model's reply
         model_reply = completion.choices[0].message.content
-        # Debug logging to inspect LLM responses when format issues occur
-        print("[DEBUG][execute_tool_chain] Model reply:\n" + (model_reply or "<empty response>"))
         conversation_history.append({"role": "assistant", "content": model_reply})
         total_process += model_reply
         tool, query, material = parse_call_response(model_reply)
@@ -328,7 +320,6 @@ def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a hel
                 )
                 # Get the model's reply
                 model_reply = completion.choices[0].message.content
-                print("[DEBUG][execute_tool_chain] Final LLM reply:\n" + (model_reply or "<empty response>"))
                 total_process += model_reply
             else:
                 tool, query, material = parse_call_response(model_reply)
@@ -415,12 +406,8 @@ Tool Chain: [*Vision Language Model* -> *Entity Recognition* -> *Text Retrieval 
 5. Connect tools using -> symbol
 6. Try your best to decompose the question and identify the required tools, you can first reference the common QA tasks to get some ideas. If the template fits the question, you can directly use the recommended tool chain. If not, you can try to decompose the question and identify the required tools.
 """
-
-def EXECUTE_TOOL_CHAIN(query, material, options=None):
-    prompt = generate_prompt(TaskDecompositionPrompt, query, material, options)
+def EXECUTE_TOOL_CHAIN(query, material, options):
+    prompt = generate_prompt(TaskDecompositionPrompt, query, material)
     res = workflow(input_text=prompt, Instruction="You are an expert in soccer.")
-    result = execute_tool_chain(
-        generate_prompt_execution(query, material, res, toolbox_descriptions, options=options),
-        toolbox_functions,
-    )
+    result = execute_tool_chain(generate_prompt_execution(query, material, res, toolbox_descriptions, options), toolbox_functions)
     return result
