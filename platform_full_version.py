@@ -9,7 +9,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://openrouter.ai/api/v1")
+client = OpenAI(api_key=os.getenv("DEEPSEEK_API_KEY"), base_url="https://api.deepseek.com")
 
 INSTRUCTION = f"""
 You are a football expert. You are provided with a question 'Q' and four options 'O1', 'O2', 'O3', and 'O4'.
@@ -18,9 +18,9 @@ Please answer the question with one option that best matches the question (repla
 Do not include any other text or explanations!!!
 """
 
-def workflow(input_text, Instruction=INSTRUCTION, follow_up_prompt=None, max_tokens_followup=16):
+def workflow(input_text, Instruction=INSTRUCTION, follow_up_prompt=None, max_tokens_followup=1500):
     completion = client.chat.completions.create(
-        model="deepseek/deepseek-chat-v3-0324",
+        model="deepseek-chat",
         messages=[
             {"role": "system", "content": Instruction},
             {"role": "user", "content": input_text}

@@ -39,8 +39,7 @@ toolbox_functions = {
     "Replay Grounding": REPLAY_GROUNDING,
     "Score and Time Recognition": SCORE_TIME_DETECTION,
     "Frame Selection": FRAME_SELECTION,
-    "Foul Recognition": FOUL_RECOGNITION,
-    "CloseQA": CLOSE_QA,
+    "Foul Recognition": FOUL_RECOGNITION
 }
 
 import os
@@ -118,14 +117,16 @@ def generate_prompt(taskdecompositionprompt, query, additional_material, options
         prompt += f"Options: {options}\n"
     return prompt
 
+
 from dotenv import load_dotenv
 load_dotenv()
-def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("DEEPSEEK_API_KEY"), max_tokens_followup=16):
 
-    client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
+def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("DEEPSEEK_API_KEY"), max_tokens_followup=1500):
+
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
     completion = client.chat.completions.create(
-        model="deepseek/deepseek-chat-v3-0324",
+        model="deepseek-chat",
         messages=[
             {"role": "system", "content": Instruction},
             {"role": "user", "content": input_text}
@@ -137,7 +138,7 @@ def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("
     
     if follow_up_prompt:
         completion = client.chat.completions.create(
-            model="deepseek/deepseek-chat-v3-0324",
+            model="deepseek-chat",
             messages=[
                 {"role": "system", "content": Instruction},
                 {"role": "user", "content": input_text},
@@ -290,7 +291,7 @@ Please make sure that your answer is consistent with the total process of the ex
 
 
 def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a helpful multi-agent assistant that can answer questions about soccer.", api_key=os.getenv("DEEPSEEK_API_KEY")):
-    client = OpenAI(api_key=api_key, base_url="https://openrouter.ai/api/v1")
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     # Initialize the conversation history with the system instruction and user input
     conversation_history = [
         {"role": "system", "content": Instruction},
@@ -300,11 +301,13 @@ def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a hel
     while True:
         # Generate a response from the model
         completion = client.chat.completions.create(
-            model="deepseek/deepseek-chat-v3-0324",
+            model="deepseek-chat",
             messages=conversation_history
         )
         # Get the model's reply
         model_reply = completion.choices[0].message.content
+        # Debug logging to inspect LLM responses when format issues occur
+        print("[DEBUG][execute_tool_chain] Model reply:\n" + (model_reply or "<empty response>"))
         conversation_history.append({"role": "assistant", "content": model_reply})
         total_process += model_reply
         tool, query, material = parse_call_response(model_reply)
@@ -320,11 +323,12 @@ def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a hel
                 llm_prompt = generate_LLM_prompt(query)
                 conversation_history.append({"role": "assistant", "content": llm_prompt})
                 completion = client.chat.completions.create(
-                    model="deepseek/deepseek-chat-v3-0324",
+                    model="deepseek-chat",
                     messages=conversation_history
                 )
                 # Get the model's reply
                 model_reply = completion.choices[0].message.content
+                print("[DEBUG][execute_tool_chain] Final LLM reply:\n" + (model_reply or "<empty response>"))
                 total_process += model_reply
             else:
                 tool, query, material = parse_call_response(model_reply)
@@ -413,7 +417,7 @@ Tool Chain: [*Vision Language Model* -> *Entity Recognition* -> *Text Retrieval 
 """
 
 def EXECUTE_TOOL_CHAIN(query, material, options=None):
-    prompt = generate_prompt(TaskDecompositionPrompt, query, material, options=options)
+    prompt = generate_prompt(TaskDecompositionPrompt, query, material, options)
     res = workflow(input_text=prompt, Instruction="You are an expert in soccer.")
     result = execute_tool_chain(
         generate_prompt_execution(query, material, res, toolbox_descriptions, options=options),
