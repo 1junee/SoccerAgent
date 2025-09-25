@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import json
-from .utils.GroundingDINO.demo import inference_on_a_image
+from .utils.GroundingDINO.demo.inference_on_a_image import main as inference_on_a_image
 import cv2
 from project_path import PROJECT_PATH
 

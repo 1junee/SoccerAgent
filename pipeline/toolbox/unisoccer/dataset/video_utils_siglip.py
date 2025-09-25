@@ -92,5 +92,5 @@ def set_transform(
         model_name = "google/siglip-base-patch16-224"
     ):
     # 创建 SiglipProcessor 实例
-    processor = AutoProcessor.from_pretrained(model_name)
+    processor = AutoProcessor.from_pretrained(model_name, use_fast=True)
     return processor

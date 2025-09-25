@@ -17,4 +17,4 @@ vlm_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
 vlm_model.eval()
 
 # default processer
-vlm_processor = AutoProcessor.from_pretrained("Qwen/Qwen2.5-VL-7B-Instruct")
+vlm_processor = AutoProcessor.from_pretrained("Qwen/Qwen2.5-VL-7B-Instruct", use_fast=True)

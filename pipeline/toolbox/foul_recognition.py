@@ -10,7 +10,7 @@ QWEN_VL_MODEL_ID = "Qwen/Qwen2.5-VL-7B-Instruct"
 
 @lru_cache(maxsize=1)
 def _load_qwen_vl(model_id: str = QWEN_VL_MODEL_ID):
-    processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
+    processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True, use_fast=True)
     model = AutoModelForVision2Seq.from_pretrained(
         model_id,
         torch_dtype="auto",

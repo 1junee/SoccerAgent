@@ -37,7 +37,7 @@ def extract_camera_position(reply):
 
 @lru_cache(maxsize=1)
 def _load_qwen_vl(model_id: str = "Qwen/Qwen2.5-VL-7B-Instruct") -> Tuple[AutoProcessor, AutoModelForVision2Seq]:
-    processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True)
+    processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True, use_fast=True)
     model = AutoModelForVision2Seq.from_pretrained(
         model_id,
         torch_dtype="auto",
@@ -109,7 +109,10 @@ def CAMERA_DETECTION(query=None, material=[]):
 
     learn_prompt = "I want you to help me identify the camera position of a football game photo. Now I will give you some example images, each of which corresponds to a specific camera position. Please learn the characteristics of these images for classification of new photos."
 
-    history = [{"role": "system", "content": learn_prompt}]
+    history = [{
+        "role": "system",
+        "content": [{"type": "text", "text": learn_prompt}],
+    }]
     for i in range(len(example_img)):
         content = [{"type": "text", "text": f"The camera position corresponding to this photo is: {camera_position[i]}"}]
         base64_image = encode_image(example_img[i])

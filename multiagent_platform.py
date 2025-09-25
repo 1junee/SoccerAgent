@@ -7,7 +7,8 @@ from tqdm import tqdm
 import argparse
 import sys
 
-
+# 기존 workflow 함수를 workflow_with_tracking으로 교체
+# 기존 execute_tool_chain 함수를 execute_tool_chain_with_tracking으로 교체
 
 ######################################
 ##                                  ##
@@ -115,7 +116,7 @@ def generate_prompt(taskdecompositionprompt, query, additional_material):
     prompt += f"Adittional Material: {additional_material}\n"
     return prompt
 
-def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("DEEPSEEK_API_KEY"), max_tokens_followup=1500):
+# def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("DEEPSEEK_API_KEY"), max_tokens_followup=1500):
 
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     
@@ -147,6 +148,52 @@ def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("
     else:
         return first_round_reply
     
+# 전역 tracker 인스턴스
+
+from token_tracker import token_tracker
+
+def workflow(input_text, Instruction, follow_up_prompt=None, api_key=os.getenv("DEEPSEEK_API_KEY"), max_tokens_followup=1500, query_info=None):
+    """기존 workflow 함수에 토큰 추적 기능 추가"""
+    from openai import OpenAI
+    
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    
+    # 첫 번째 API 호출
+    completion = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[
+            {"role": "system", "content": Instruction},
+            {"role": "user", "content": input_text}
+        ],
+        stream=False 
+    )
+    
+    # 토큰 사용량 로깅
+    token_tracker.log_api_call(completion, query_info, "first_round")
+    
+    first_round_reply = completion.choices[0].message.content
+    
+    if follow_up_prompt:
+        completion = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[
+                {"role": "system", "content": Instruction},
+                {"role": "user", "content": input_text},
+                {"role": "assistant", "content": first_round_reply},
+                {"role": "user", "content": follow_up_prompt}
+            ],
+            max_tokens=max_tokens_followup,
+            stream=False
+        )
+        
+        # 두 번째 API 호출 로깅
+        token_tracker.log_api_call(completion, query_info, "second_round")
+        
+        second_round_reply = completion.choices[0].message.content
+        return first_round_reply, second_round_reply
+    else:
+        return first_round_reply
+
 def parse_input(input_str):
     known_info = re.findall(r'\$(.*?)\$', input_str)
     
@@ -284,7 +331,7 @@ Please make sure that your answer is consistent with the total process of the ex
 
 
 
-def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a helpful multi-agent assistant that can answer questions about soccer.", api_key=os.getenv("DEEPSEEK_API_KEY")):
+# def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a helpful multi-agent assistant that can answer questions about soccer.", api_key=os.getenv("DEEPSEEK_API_KEY")):
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     # Initialize the conversation history with the system instruction and user input
     conversation_history = [
@@ -327,6 +374,70 @@ def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a hel
                 user_execution = execute_tool_call(tool, query, material, toolbox_functions)
                 total_process += user_execution
             
+            return total_process
+
+def execute_tool_chain(input_text, toolbox_functions, Instruction="You are a helpful multi-agent assistant that can answer questions about soccer.", api_key=os.getenv("DEEPSEEK_API_KEY"), query_info=None):
+    """기존 execute_tool_chain 함수에 토큰 추적 기능 추가"""
+    from openai import OpenAI
+    
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    conversation_history = [
+        {"role": "system", "content": Instruction},
+        {"role": "user", "content": input_text}
+    ]
+    total_process = ""
+    step_counter = 0
+    
+    while True:
+        step_counter += 1
+        completion = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=conversation_history
+        )
+        
+        # 각 스텝별 토큰 사용량 로깅
+        token_tracker.log_api_call(completion, query_info, f"tool_execution_step_{step_counter}")
+        
+        model_reply = completion.choices[0].message.content
+        conversation_history.append({"role": "assistant", "content": model_reply})
+        total_process += model_reply
+        
+    
+        try:
+            tool, query, material = parse_call_response(model_reply)
+            if tool != "LLM":
+                material = ast.literal_eval(material) if material is not None else []
+                user_execution = execute_tool_call(tool, query, material, toolbox_functions)
+                conversation_history.append({"role": "user", "content": user_execution})
+                total_process += user_execution
+        except:
+            pass
+        
+        if "<EndCall>" in model_reply:
+            if tool == "LLM":
+                llm_prompt = generate_LLM_prompt(query)
+                conversation_history.append({"role": "assistant", "content": llm_prompt})
+                completion = client.chat.completions.create(
+                    model="deepseek-chat",
+                    messages=conversation_history
+                )
+                
+                # 최종 LLM 호출 로깅
+                token_tracker.log_api_call(completion, query_info, "final_llm_call")
+                
+                model_reply = completion.choices[0].message.content
+                total_process += model_reply
+            else:
+                try:
+                    tool, query, material = parse_call_response(model_reply)
+                    material = ast.literal_eval(material) if material is not None else []
+                    user_execution = execute_tool_call(tool, query, material, toolbox_functions)
+                    total_process += user_execution
+                except:
+                    pass
+
+            print("\n[total process]\n", total_process)
+
             return total_process
 
 ######################## Some Basic Prompt Information ########################
@@ -409,5 +520,7 @@ Tool Chain: [*Vision Language Model* -> *Entity Recognition* -> *Text Retrieval 
 def EXECUTE_TOOL_CHAIN(query, material, options):
     prompt = generate_prompt(TaskDecompositionPrompt, query, material)
     res = workflow(input_text=prompt, Instruction="You are an expert in soccer.")
+    print("\n[task decomposition]\n", res)
+
     result = execute_tool_chain(generate_prompt_execution(query, material, res, toolbox_descriptions, options), toolbox_functions)
     return result
