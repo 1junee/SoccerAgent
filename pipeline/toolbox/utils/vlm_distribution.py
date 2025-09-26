@@ -12,9 +12,9 @@ print("VLM on:", DEVICE)
 
 # default: Load the model on the available device(s)
 vlm_model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-    "Qwen/Qwen2.5-VL-7B-Instruct", torch_dtype="auto", device_map="auto"
+    f"{PROJECT_PATH}/Qwen2.5-VL", torch_dtype="auto", device_map="auto"
 )
 vlm_model.eval()
 
 # default processer
-vlm_processor = AutoProcessor.from_pretrained("Qwen/Qwen2.5-VL-7B-Instruct", use_fast=True)
+vlm_processor = AutoProcessor.from_pretrained(f"{PROJECT_PATH}/Qwen2.5-VL", use_fast=True)
