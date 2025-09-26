@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import json
-from .utils.GroundingDINO.demo.inference_on_a_image import main as inference_on_a_image
+from .utils.GroundingDINO.demo.inference_on_a_image import run_inference_on_image
 import cv2
 from project_path import PROJECT_PATH
 
@@ -19,7 +19,7 @@ def SEGMENT(query=None, material=[]):
     video_extensions = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.webm']
 
     if file_extension in image_extensions:
-        pred_dict = inference_on_a_image(config_file, model_weights, image_path, text, output_path)
+        pred_dict = run_inference_on_image(config_file, model_weights, image_path, text, output_path)
         output_img = os.path.join(output_path, "pred.jpg")
         if os.path.exists(output_img):
             descriptions = f"The object you want to segment has been prompted with bounding box on the image, which is saved at [{output_img}]."
@@ -54,7 +54,7 @@ def SEGMENT(query=None, material=[]):
         best_pred_dict = None
 
         for image_path in images_path:
-            pred_dict = inference_on_a_image(config_file, model_weights, image_path, text, output_path)
+            pred_dict = run_inference_on_image(config_file, model_weights, image_path, text, output_path)
             current_detections = len(pred_dict['boxes'])
             
             if current_detections > max_detections:
@@ -62,7 +62,7 @@ def SEGMENT(query=None, material=[]):
                 best_image_path = image_path
                 best_pred_dict = pred_dict
         if best_pred_dict is not None:
-            pred_dict = inference_on_a_image(config_file, model_weights, best_image_path, text, output_path)
+            pred_dict = run_inference_on_image(config_file, model_weights, best_image_path, text, output_path)
             output_img = os.path.join(output_path, "pred.jpg")
             if os.path.exists(output_img):
                 descriptions = f"The object you want to segment has been prompted with bounding box on the image, which is saved at [{output_img}]."

@@ -27,7 +27,7 @@ def JERSEY_NUMBER_RECOGNITION(query=None, material=[]):
         image_list.append(img)
 
     model_path = f"{PROJECT_PATH}/pipeline/toolbox/utils/legibility_resnet34_soccer_20240215.pth" # Replace with your actual model path
-    qwen_path = "Qwen/Qwen2.5-VL-7B-Instruct"
+    qwen_path = f"{PROJECT_PATH}/Qwen2.5-VL"
     ans, result = run(device, image_list, model_path, qwen_path, threshold=0.5)
     ans = -1 if ans == None else ans
     ans = f"The jersey number in the pictures is {ans}."

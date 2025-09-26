@@ -38,10 +38,17 @@ def extract_camera_position(reply):
 @lru_cache(maxsize=1)
 def _load_qwen_vl(model_id: str = "Qwen/Qwen2.5-VL-7B-Instruct") -> Tuple[AutoProcessor, AutoModelForVision2Seq]:
     processor = AutoProcessor.from_pretrained(model_id, trust_remote_code=True, use_fast=True)
+
+    # GPU 두 장으로 나눠서 올리기
+    max_memory = {
+        2: "48GiB",  # 첫 번째 GPU 메모리 한도
+        3: "48GiB",  # 두 번째 GPU 메모리 한도
+    }
     model = AutoModelForVision2Seq.from_pretrained(
         model_id,
         torch_dtype="auto",
         device_map="auto",
+        max_memory=max_memory,
         trust_remote_code=True,
     ).eval()
     return processor, model
