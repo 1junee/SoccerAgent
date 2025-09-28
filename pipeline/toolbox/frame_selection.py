@@ -1,4 +1,3 @@
-
 import os
 import cv2
 import torch
@@ -47,7 +46,7 @@ def select_rand_frame(video_path):
 
 def FRAME_SELECTION(query, material, output_dir=None):
     if output_dir is None:
-        output_dir = os.path.join(PROJECT_PATH, "log/")
+        output_dir = os.path.join(PROJECT_PATH, "log/cache")
 
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
     os.makedirs(output_dir, exist_ok=True)

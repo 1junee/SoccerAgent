@@ -22,8 +22,6 @@ pip install huggingface-hub
 
 huggingface-cli login --token YOUR_TOKEN
 
-hf download Qwen/Qwen2.5-VL-7B-Instruct --local-dir ./Qwen2.5-VL
-huggingface-cli download Qwen/Qwen2.5-VL-7B-Instruct --local-dir ./Qwen2.5-VL
 
 
 mkdir -p /home/work/wonjun/study/agent/SoccerAgent/pipeline/toolbox/unisoccer/checkpoints
