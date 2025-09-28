@@ -59,11 +59,12 @@ Please provide your answer:
     answer_match = re.search(r"O\d+", processed_prompt)
     answer = answer_match.group(0) if answer_match else None
 
-
+    known_info = re.findall(r"\$+(.*?)\$+", plan)
     planned_tools = re.findall(r"\*+([^*]+)\*+", plan)
     executed_tools = re.findall(r"<Tool>(.*?)</Tool>", openA_process)
 
     result_dict = input_dict.copy()
+    result_dict["known_info"] = known_info
     result_dict["planned_tools"] = planned_tools
     result_dict["executed_tools"] = executed_tools
     result_dict["openA_process"] = openA_process
