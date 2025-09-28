@@ -49,17 +49,9 @@ pip install -U "huggingface_hub[cli]"
 huggingface-cli login
 
 # 3) 전체 파일 내려받기 (심볼릭 링크 대신 실제 파일로 저장)
-huggingface-cli download \
-  --repo-type dataset Homie0609/SoccerBench \
-  --local-dir ./datasets/SoccerBench \
-  --local-dir-use-symlinks False \
-  --max-workers 2
+huggingface-cli download --repo-type dataset Homie0609/SoccerBench --local-dir ./datasets/SoccerBench --local-dir-use-symlinks False --max-workers 1
 
-huggingface-cli download \
-  --repo-type dataset SJTU-AI4Sports/SoccerWiki \
-  --local-dir ./datasets/SoccerWiki \
-  --local-dir-use-symlinks False \
-  --max-workers 2
+huggingface-cli download --repo-type dataset SJTU-AI4Sports/SoccerWiki --local-dir ./datasets/SoccerWiki --local-dir-use-symlinks False --max-workers 1
 
   
 
